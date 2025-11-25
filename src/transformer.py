@@ -1,6 +1,6 @@
 import torch
-import torch.functional as F
 import torch.nn as nn
+import torch.nn.functional as F
 from torch import Tensor
 
 from src.utils import get_device
@@ -22,7 +22,8 @@ class VARTransformer(nn.Module):
         self.max_sequence_length = sum([x**2 for x in self.scales])
         self.n_transformer_layers = n_transformer_layers
 
-        self.register_buffer("attention_mask", self.mask_matrix().to(device))
+        attention_mask = self.mask_matrix(device)
+        self.register_buffer("attention_mask", attention_mask)
 
         self.start_token = nn.Parameter(torch.randn(1, 1, embedding_dim))
         self.vocab_embeddings = nn.Embedding(
@@ -50,9 +51,9 @@ class VARTransformer(nn.Module):
         )
 
     @torch.no_grad()
-    def mask_matrix(self) -> Tensor:
+    def mask_matrix(self, device: torch.device) -> Tensor:
         size = self.max_sequence_length
-        mask = torch.zeros(size, size).to(self.device)
+        mask = torch.zeros(size, size).to(device)
         mask = torch.fill(mask, -torch.inf)
 
         # First add the mask for the start token
@@ -103,7 +104,9 @@ class VARTransformer(nn.Module):
 
             # 3. Interpolate to the size of the next scale (H*2, W*2)
             words = F.interpolate(
-                words, scale_factor=2, mode="bilinear"
+                words,
+                scale_factor=2,
+                mode="bilinear",
             )  # (B, C, H, W)
 
             # 4. Reshape it back to the sequence for the transformer (B, H*2*W*2, C)
@@ -131,11 +134,15 @@ class VARTransformer(nn.Module):
 
 
 if __name__ == "__main__":
+    from loguru import logger
+
+    device = get_device()
     x = [
-        torch.arange(0, 1, 1).unsqueeze(0).to("mps"),
-        torch.arange(0, 4, 1).unsqueeze(0).to("mps"),
-        torch.arange(0, 16, 1).unsqueeze(0).to("mps"),
-        torch.arange(0, 64, 1).unsqueeze(0).to("mps"),
+        torch.arange(0, 1, 1).unsqueeze(0).to(device),
+        torch.arange(0, 4, 1).unsqueeze(0).to(device),
+        torch.arange(0, 16, 1).unsqueeze(0).to(device),
+        torch.arange(0, 64, 1).unsqueeze(0).to(device),
     ]
-    var_test = VARTransformer(32).to("mps")
+    var_test = VARTransformer(32).to(device)
     y = var_test(x)
+    logger.info(f"Output shape: {y.shape}")

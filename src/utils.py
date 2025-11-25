@@ -2,12 +2,12 @@ from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader
-from torchvision.datasets import datasets
+from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 
 
 def get_device() -> torch.device:
-    if torch.backends.cuda.is_available():
+    if torch.cuda.is_available():
         return torch.device("cuda")
 
     if torch.backends.mps.is_available():
@@ -28,7 +28,7 @@ def get_mnist_dataloader(
             transforms.ToTensor(),
         ]
     )
-    train_ds = datasets.MNIST(
+    train_ds = MNIST(
         root=str(data_dir),
         train=True,
         transform=transform,
