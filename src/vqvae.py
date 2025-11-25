@@ -351,3 +351,17 @@ class Decoder(nn.Module):
         x = self.conv2(x)
 
         return x
+
+
+if __name__ == "__main__":
+    from loguru import logger
+
+    tokenizer = VARTokenizer(
+        scales=(1, 2, 4, 8),
+        latent_dim=16,
+        codebook_size=8,
+    )
+
+    x = torch.randn(1, 1, 32, 32)
+    y, *_ = tokenizer.forward(x)
+    logger.info(f"Output shape: {y.shape}")
