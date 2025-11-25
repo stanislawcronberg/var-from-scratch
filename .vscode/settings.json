@@ -1,13 +1,12 @@
 {
     "files.watcherExclude": {
         "**/.git/objects/**": true,
-        "**/.git/subtree-cache/**": true,
-        "**/.venv/**": true
+        "**/.git/subtree-cache/**": true
     },
     "files.exclude": {
-        "**/.venv": true,
         ".ruff_cache": true,
-        ".mypy_cache": true
+        ".mypy_cache": true,
+        "**/.venv": true
     },
     "files.autoSave": "onFocusChange",
     "files.associations": {},
