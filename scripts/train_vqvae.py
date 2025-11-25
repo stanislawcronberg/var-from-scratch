@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import torch
-import tqdm
+from tqdm import tqdm, trange
 
 from src.utils import get_device, get_mnist_dataloader
 from src.vqvae import VARTokenizer
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.AdamW(var_tokenizer.parameters(), lr=5e-5)
 
-    for epoch in tqdm.trange(1, desc="Training"):
+    for epoch in trange(1, desc="Training"):
         with tqdm(train_dl, unit="batch") as pbar:
             for x, _ in pbar:
                 x = x.to(device)
